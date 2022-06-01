@@ -17,12 +17,14 @@ try {
 	echo "Error: " . $e->getMessage();
 }
 
-// Report 2 days back.
+// Report 8 days back.
 $fromDate = date('Y-m-d',time()-60*60*24*8);
 
-$historyHandler = $db->prepare("SELECT DISTINCT `id` FROM HistoryLog WHERE type = 'User' AND `changed` >= $fromDate");
-$historyInfoHandler = $db->prepare("SELECT `id`, `action`, `message`, `updater` FROM HistoryLog WHERE type = 'User' AND `changed` >= $fromDate AND id = :UserId");
+$historyHandler = $db->prepare("SELECT DISTINCT `id` FROM HistoryLog WHERE type = 'User' AND `changed` >= :FromDate");
+$historyHandler->bindParam(':FromDate', $fromDate);
+$historyInfoHandler = $db->prepare("SELECT `id`, `action`, `message`, `updater`, `changed` FROM HistoryLog WHERE type = 'User' AND `changed` >= :FromDate AND id = :UserId");
 $historyInfoHandler->bindParam(':UserId', $userId);
+$historyInfoHandler->bindParam(':FromDate', $fromDate);
 $userHandler = $db->prepare('SELECT Users.`id`, `userName`, Users.`fullName`, `EPPN`, `email`, `sshKey`, `sshEnabled`, `accessLevel`, `shortName`, `expireDate` FROM Users, Organizations WHERE Organizations_id = Organizations.id AND Users.id = :UserId');
 $userHandler->bindParam(':UserId', $userId);
 $writeHandler = $db->prepare('SELECT `group` FROM UserWrite, Groups WHERE `Users_id` = :UserId AND `Groups_id` = Groups.`id` ORDER BY `group`');
@@ -41,9 +43,7 @@ while ($history = $historyHandler->fetch(PDO::FETCH_ASSOC)) {
 		if ($user['sshEnabled']) {
 			$historyInfoHandler->execute();
 			while ($historyInfo = $historyInfoHandler->fetch(PDO::FETCH_ASSOC) ) {
-				$mesg .= sprintf ('# %s by %s<br>%s', $historyInfo['message'], utf8_decode($historyInfo['updater']), "\n");
-				#$mesg .= sprintf ('# %s by %s<br>%s', $historyInfo['message'], $historyInfo['updater'], "\n");
-				#printf ('%s <-> %s%s', $historyInfo['updater'],utf8_decode($historyInfo['updater']), "\n");
+				$mesg .= sprintf ('# %s by %s at %s<br>%s', $historyInfo['message'], utf8_decode($historyInfo['updater']), $historyInfo['changed'], "\n");
 			}
 			$mesg .= sprintf ('customer-users %s {<ul style="list-style-type:none">%s	<li>description	"%s, %s";</li>%s	<li>ssh-keys           [ "%s" ];</li>%s', $user['userName'], "\n", utf8_decode($user['fullName']), $user['email'], "\n",  $user['sshKey'], "\n");
 			$userId = $user['id'];

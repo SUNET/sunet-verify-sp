@@ -48,3 +48,5 @@ CREATE TABLE HistoryLog (
 INSERT INTO Organizations (`id`,`shortName`, `fullName`) VALUES (1,'MyOrg', 'MyOrganization rename');
 
 INSERT INTO Users (`Organizations_id`, `userName`, `fullName`, `EPPN`, `email`, `sshKey`, `sshEnabled`, `accessLevel`) VALUES (1, 'admin', '', '', 'admin@sunet.se', '', 0, 7);
+
+INSERT INTO Params (`name`, `value`) VALUES ('expireDate', '2023-04-30');
