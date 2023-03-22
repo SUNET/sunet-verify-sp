@@ -122,9 +122,9 @@ switch($action) {
 		} elseif (isset($_POST['save']) && isset($_POST['userId'])) {
 			if ($userId = $users->saveUser($_POST['userId'])) {
 				if ($action == 'addUser') {
-					$security->logChanges($_POST['userId'], 'User', 'add', 'Added user');
+					$security->logChanges($userId, 'User', 'add', 'Added user');
 				} else {
-					$security->logChanges($_POST['userId'], 'User', 'update', 'Updated user');
+					$security->logChanges($userId, 'User', 'update', 'Updated user');
 				}
 			} else {
 				$userId = $_POST['userId'];
